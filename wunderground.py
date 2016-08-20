@@ -102,6 +102,16 @@ class Weather:
         theString = response.read().decode('utf-8')
         theDict= json.loads(theString)
         logging.debug("json response received:%s"%theString)
+        if 'error' in theDict['response']:
+            print("Error, Wunderground reports: %s"%theDict['response']['error']['description'])
+            return(False)
+        if 'results' in theDict['response']:
+            print("The location is ambiguous.  Wunderground reports %i locations"%len(theDict['response']['results']))
+            for x in theDict['response']['results']:
+                for key,value in x.items():
+                    print(value,end=',')
+                print()
+            return(False)
         return (theDict)
 
     def PrintReport(self,theWeather):
@@ -195,8 +205,8 @@ def main():
     
     weather = Weather(theShelve['location'],theShelve['APIkey'],theShelve['units'])
     theWeather = weather.GetWeather()
-    weather.PrintReport(theWeather)
-
+    if theWeather:
+        weather.PrintReport(theWeather)
     logging.info("Done")
     theShelve.close()
 
